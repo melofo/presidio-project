@@ -1,0 +1,72 @@
+service: presidio-project
+
+frameworkVersion: "3"
+
+provider:
+  name: aws
+  runtime: python3.10
+  profile: serverlessUser # AWS profile used for deployment
+  region: us-west-1 # AWS region where the service will be deployed
+  environment:
+    inputBucketName: ${self:custom.inputBucketName}
+    tableName: ${self:custom.tableName}
+    outputBucketName: ${self:custom.outputBucketName}
+  iamRoleStatements: # IAM role permissions required for the service
+    - Effect: Allow
+      Action:
+        - dynamodb:* # Allow all DynamoDB actions
+        - s3:* # Allow all S3 actions
+      Resource: "*" # Allow access to all resources
+
+plugins:
+  - serverless-s3-sync # Plugin for synchronizing S3 buckets
+  # webpack
+
+custom:
+  inputBucketName: presidio-s3-input-bucket
+  tableName: presidio-dynamodb-table
+  outputBucketName: presidio-s3-output-bucket
+  s3Sync:
+    - bucketName: ${self:custom.inputBucketName} # S3 bucket to sync with local directory
+      localDir: upload-data # Local directory to sync with the S3 bucket
+
+functions:
+  presidio-lambda:
+    handler: handler.presidio_lambda
+    events:
+      - s3:
+          bucket: ${self:custom.inputBucketName} # S3 bucket trigger for the function
+          event: s3:ObjectCreated:* # Trigger event when an object is created
+          existing: true # Include existing objects in the bucket
+  get-result:
+    handler: handler.get_result
+    events:
+      - http:
+          path: get-result/{fileName}
+          method: GET
+          cors: true
+
+resources:
+  Resources:
+    S3InputBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:custom.inputBucketName}
+    S3OutBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:custom.outputBucketName}
+    DynamoDBTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.tableName}
+        AttributeDefinitions:
+          - AttributeName: file-key
+            AttributeType: S
+        KeySchema:
+          - AttributeName: file-key
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+# 1. Create an IAM User (ServerlessAccount - programmatic access, administrator access, access key ID, and secret access key).
+# 2. npm install -g serverless
+# 3. serverless config credentials –provider aws --key {access key ID} --secret {secret access key} -- profile serverlessUser

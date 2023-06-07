@@ -1,0 +1,34 @@
+{
+	"info": {
+		"_postman_id": "877a5c66-133e-4bd4-9967-3c52c3fe25d2",
+		"name": "presidio-project",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "11308932"
+	},
+	"item": [
+		{
+			"name": "https://y76xua8pwf.execute-api.us-west-1.amazonaws.com/dev/get-result/Final_MOCK_DATA",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://y76xua8pwf.execute-api.us-west-1.amazonaws.com/dev/get-result/Final_MOCK_DATA",
+					"protocol": "https",
+					"host": [
+						"y76xua8pwf",
+						"execute-api",
+						"us-west-1",
+						"amazonaws",
+						"com"
+					],
+					"path": [
+						"dev",
+						"get-result",
+						"Final_MOCK_DATA"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
